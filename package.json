@@ -11,7 +11,9 @@
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "lint-fix": "eslint --ext .js,.vue --ignore-path .gitignore . --fix",
-    "precommit": "npm run lint"
+    "precommit": "npm run lint",
+    "push": "./rsync.sh",
+    "push_win": "./scp.sh"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.0.0",
