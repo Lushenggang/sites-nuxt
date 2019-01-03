@@ -30,5 +30,8 @@ export default {
     return axios.put('/api/save-user-avatar/', data, {
       headers: { 'content-Type': 'multipart/form-data' }
     })
+  },
+  githubLogin (code) {
+    return axios.get('/api/github_login/?code=' + code)
   }
 }

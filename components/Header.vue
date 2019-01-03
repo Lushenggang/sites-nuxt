@@ -63,7 +63,8 @@ export default {
       this.$router.push({ path })
     },
     login () {
-      location.href=`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}`
+      let scope = "user:email"
+      window.open(`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=${scope}`, 'login')
     }
   }
 }
