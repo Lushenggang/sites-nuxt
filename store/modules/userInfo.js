@@ -9,8 +9,7 @@ export default {
     username: '',
     avatar: '',
     manager: false,
-    id: '',
-    gitClientId: ''
+    id: ''
   },
   actions: {
     getUserInfo (context) {

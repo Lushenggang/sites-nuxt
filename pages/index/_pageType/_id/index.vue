@@ -92,9 +92,7 @@
       <div class="post-comments">
         <div class="comment-title">评论({{ commentNum }})</div>
         <div class="add-comment">
-          <Input 
-            v-model="comment" 
-            type="textarea" />
+          <comment-input v-model="comment"/>
           <Button 
             type="primary" 
             class="submit" 
@@ -173,11 +171,11 @@
                 <div 
                   v-if="data.commentEdit" 
                   class="reply-edit">
-                  <Input 
-                    :rows="2" 
-                    :autosize="true" 
-                    v-model="data.comment" 
-                    class="reply-input" 
+                  <Input
+                    :rows="2"
+                    :autosize="true"
+                    v-model="data.comment"
+                    class="reply-input"
                     type="textarea" />
                   <Button 
                     class="cancel" 
@@ -210,6 +208,7 @@
 
 <script>
 import postApi from '@/api/post'
+import commentInput from '@/components/CommentInput'
 
 export default {
   asyncData({isDev, route, store, env, params, query, req, res, redirect, error}) {
@@ -230,6 +229,9 @@ export default {
     }).catch(e => {
       error({ statusCode: 404, message: '从后台获取文章失败' })
     })
+  },
+  components: {
+    'comment-input': commentInput
   },
   data () {
     return {
@@ -349,6 +351,7 @@ export default {
     },
     setComment (data) {
       if (!this.userInfo.username) {
+        this.$bus.$emit('login-show')
         this.$Message.info('请先登录再进行评论')
         return
       }
@@ -358,13 +361,18 @@ export default {
       }
     },
     addComment (comment, response) {
+      if (!comment) {
+        this.$Message.info('评论不能为空')
+        return
+      }
       if (!this.userInfo.username) {
+        this.$bus.$emit('login-show')
         this.$Message.info('请先登录再进行评论')
         return
       }
       let params = {
         body: comment,
-        postId: this.$route.query.id,
+        postId: this.$route.params.id,
       }
       if (response) {
         params.responseId = response

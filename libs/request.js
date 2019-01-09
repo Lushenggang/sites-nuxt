@@ -24,7 +24,6 @@ function resPreHandle (response) {
 }
 
 function responseError (error) {
-  console.log(error, '~~~~~~')
   if (error.response.data && error.response.data.notify) {
     iView.Message.error(error.response.data.message)
   }

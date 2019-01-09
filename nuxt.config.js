@@ -33,10 +33,11 @@ module.exports = {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    '~plugins/iview',
-    '~plugins/showdown',
-    '~plugins/moment',
-    '~plugins/simpleTree'
+    { src: '~plugins/iview', ssr: false },
+    { src: '~plugins/showdown', ssr: false },
+    { src: '~plugins/moment', ssr: false },
+    { src: '~plugins/simpleTree', ssr: false },
+    { src: '~plugins/common', ssr: false }
   ],
 
   /*

@@ -10,16 +10,10 @@
       @click.stop="clickMenu(nav.type)">
       {{ nav.title }}
     </div>
-    <div 
-      class="nav-item" 
-      @click.stop="login">
-      登录
-    </div>
   </div>
 </template>
 
 <script>
-import { CLIENT_ID } from '@/libs/config'
 
 export default {
   data () {
@@ -61,10 +55,6 @@ export default {
     clickMenu (type) {
       let path = type === 'home' ? '/' : `/${type}`
       this.$router.push({ path })
-    },
-    login () {
-      let scope = "user:email"
-      window.open(`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=${scope}`, 'login')
     }
   }
 }

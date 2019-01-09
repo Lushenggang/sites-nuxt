@@ -33,5 +33,8 @@ export default {
   },
   githubLogin (code) {
     return axios.get('/api/github_login/?code=' + code)
+  },
+  getUserDetail (id) {
+    return axios.get(`/api/user_detail/?id=${id}`)
   }
 }

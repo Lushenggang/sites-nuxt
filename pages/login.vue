@@ -5,6 +5,7 @@
 
 <script>
 import userApi from '@/api/user'
+import { setToken } from '@/libs/tool'
 
 export default {
   data () {
@@ -17,8 +18,13 @@ export default {
     loginWithCode () {
       if (!this.$route.query.code) return
       userApi.githubLogin(this.$route.query.code).then(res => {
-        console.log(res)
-        this.$Message.success('登录成功')
+        let token = res.data.token
+        setToken(token)
+        window.opener && window.opener._loginCallback && window.opener._loginCallback(true)
+        this.$bus.$emit('login-callback', true)
+      }).catch(error => {
+        window.opener && window.opener._loginCallback && window.opener._loginCallback(false)
+        this.$bus.$emit('login-callback', false)
       })
     }
   }
