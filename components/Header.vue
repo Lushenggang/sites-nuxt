@@ -27,17 +27,21 @@ export default {
           title: '文章',
           type: 'postlist'
         },
-        {
-          title: '分类',
-          type: 'category'
-        },
-        {
-          title: '标签',
-          type: 'tag'
-        },
+        // {
+        //   title: '分类',
+        //   type: 'category'
+        // },
+        // {
+        //   title: '标签',
+        //   type: 'tag'
+        // },
         {
           title: '归档',
           type: 'timeline'
+        },
+        {
+          title: '留言板',
+          type: 'bbs'
         },
         {
           title: '其它',

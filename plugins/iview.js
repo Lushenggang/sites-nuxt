@@ -5,7 +5,8 @@ import {
   Modal,
   Icon,
   Message,
-  Drawer
+  Drawer,
+  Page
 } from 'iview'
 
 Vue.component('Button', Button)
@@ -13,6 +14,7 @@ Vue.component('Modal', Modal)
 Vue.component('Input', Input)
 Vue.component('Icon', Icon)
 Vue.component('Drawer', Drawer)
+Vue.component('Page', Page)
 Vue.prototype.$Message = Message
 
 import 'iview/dist/styles/iview.css'

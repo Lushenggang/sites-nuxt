@@ -82,6 +82,7 @@
               <Icon type="md-person" />
             </div>
             <div
+              v-if="userInfo.id === currentUser.id"
               :class="{
                 'info-tab': true,
                 current: infoTab === 'setting' }">
@@ -394,5 +395,5 @@ export default {
   width 35rem!important
   max-width 100%
 *
-  box-sizing content-box
+  box-sizing border-box
 </style>
