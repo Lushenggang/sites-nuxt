@@ -96,13 +96,17 @@
               <div
                 :class="{
                   'info-comment': true,
-                  current: infoShowTab === 'comments' }">
+                  current: infoShowTab === 'comments'
+                }"
+                @click.stop="infoShowTab = 'comments'">
                 评论（<span>{{ userInfo.comments.length }}</span>）
               </div>
               <div
                 :class="{
                   'info-bbs': true,
-                  current: infoShowTab === 'bbs' }">
+                  current: infoShowTab === 'bbs'
+                }"
+                @click.stop="infoShowTab = 'bbs'">
                 留言（<span>{{ userInfo.bbs.length }}</span>）
               </div>
             </div>
@@ -139,6 +143,31 @@
                       </div>
                     </div>
                   </avatar>
+                </div>
+              </div>
+              <div 
+                v-else 
+                class="bbs-list">
+                <div 
+                  v-for="(bbs, idx) of userInfo.bbs" 
+                  :key="idx" 
+                  class="bbs">
+                  <avatar 
+                    :user-id="userInfo.id" 
+                    class="avatar">
+                    <div 
+                      v-if="userinfo" 
+                      slot-scope="{ userinfo }" 
+                      class="avatar-slot">
+                      <img 
+                        :src="userinfo.avatar" 
+                        alt="用户头像" />
+                      <div class="bbs-info">
+                        <div class="bbs-username">{{ userinfo.username }}</div>
+                        <div class="bbs-content">{{ bbs.body }}</div>
+                      </div>
+                    </div>
+                  </avatar> 
                 </div>
               </div>
             </div>
@@ -356,8 +385,8 @@ export default {
           &.current
             border-bottom 2px solid #3361d8
       .info-show-content
-        .comments
-          .comment
+        .comments, .bbs-list
+          .comment, .bbs
             .avatar
               .avatar-slot
                 display flex
@@ -368,13 +397,13 @@ export default {
                   width 3rem
                   height 3rem
                   border-radius 4px
-                .comment-info
+                .comment-info, .bbs-info
                   flex auto
                   margin-left .5rem
-                  .comment-username
+                  .comment-username, .bbs-username
                     font-size 1rem
                     color #3361d8
-                  .comment-content
+                  .comment-content, .bbs-content
                     font-size 20px
                     padding .5rem 0
                   .comment-post

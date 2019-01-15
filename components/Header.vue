@@ -5,6 +5,7 @@
       :class="{
         'nav-item': true,
         'current-item': type === nav.type,
+        'manage-hide': nav.type === 'manage' && !userInfo.manager
       }"
       :key="idx"
       @click.stop="clickMenu(nav.type)">
@@ -46,6 +47,10 @@ export default {
         {
           title: '其它',
           type: 'other'
+        },
+        {
+          title: '管理',
+          type: 'manage'
         }
       ]
     }
@@ -53,6 +58,9 @@ export default {
   computed: {
     type () {
       return this.$route.params.pageType || 'home'
+    },
+    userInfo () {
+      return this.$store.state.userInfo
     }
   },
   methods: {
@@ -81,5 +89,7 @@ export default {
     cursor pointer
     &.current-item
       background #6190E8
+    &.manage-hide
+      display none
 </style>
 

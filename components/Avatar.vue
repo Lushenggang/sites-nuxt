@@ -1,8 +1,8 @@
 <template>
   <div>
-    <template v-if="loaded">
-      <slot :userinfo="userinfo"></slot>
-    </template>
+    <slot 
+      v-if="userinfo" 
+      :userinfo="userinfo"></slot>
   </div>
 </template>
 
@@ -15,15 +15,9 @@ export default {
       required: true
     }
   },
-  data () {
-    return {
-      loaded: false,
-    }
-  },
   computed: {
     userinfo () {
-      if (!this.loaded) return null
-      return this.$store.state.user.info[this.userId]
+      return this.$store.state.user.info[this.userId] || null
     }
   },
   watch: {
@@ -39,14 +33,7 @@ export default {
       getInfo: 'user/getInfo'
     }),
     refreshInfo () {
-      if (this.userId) {
-        this.getInfo({
-          id: this.userId,
-          callback: () => {
-            this.loaded = true
-          }
-        })
-      }
+      this.userId && this.getInfo({ id: this.userId })
     }
   }
 }

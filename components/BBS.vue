@@ -1,25 +1,25 @@
 <template>
   <div class="bbs-page">
-    <div class="comment-input">
+    <div
+      ref="commentInput"
+      class="comment-input">
       <CommentInput
         v-model="content"
         placeholder="来都来了，说点啥吧" />
       <Button
         type="primary"
         class="submit"
-        @click.stop="addBBS(this.content)">
+        @click.stop="addBBS(content)">
         留言
       </Button>
     </div>
     <div class="bbs-list">
-      {{ bbsList }}
       <simple-tree
         :expand="false"
         :max-indent="36"
         :node-class="'tree-node-container'"
         :tree-data="bbsList"
-        class="bbs-tree"
-      >
+        class="bbs-tree">
         <div
           slot-scope="{ parentData, data }"
           :class="{ 
@@ -27,7 +27,7 @@
             'bbs-tree-node': true,
         }">
           <avatar
-            :user-id="bbs.author_id"
+            :user-id="data.author_id"
             class="bbs-avatar">
             <div
               v-if="userinfo"
@@ -36,10 +36,12 @@
               <img 
                 :src="userinfo.avatar" 
                 class="avatar-img">
+              <span class="avatar-username">{{ userinfo.username }}</span>
               <span 
-                v-if="data.timestamp" 
-                class="avatar-username">{{ userinfo.username }}</span>
-              <span class="reply-time">{{ $formatTime(data.timestamp) }}</span>
+                v-if="data.timestamp"
+                class="reply-time">
+                {{ $formatTime(data.timestamp) }}
+              </span>
               <span 
                 v-if="data.response_id" 
                 class="reply-comment reply">
@@ -47,7 +49,7 @@
                   回复
                 </span>
                 <avatar
-                  :user-id="commentInfo[data.response_id].author_id"
+                  :user-id="data.response_author_id"
                   class="reply-avatar">
                   <div 
                     v-if="userinfo" 
@@ -62,10 +64,13 @@
           </avatar>
           <div class="bbs-body">{{ data.body }}</div>
           <div class="bbs-menu">
-            <Icon 
-              class="reply-icon" 
-              type="ios-undo" 
-              @click.stop="setReply(data)" />
+            <span
+              @click.stop="setReply(data)">
+              <Icon 
+                class="reply-icon" 
+                type="ios-undo" 
+                @click.stop="setReply(data)" />回复
+            </span>
           </div>
           <div 
             v-if="data.replyEdit" 
@@ -77,20 +82,21 @@
               class="reply-input" 
               type="textarea" />
             <Button 
-              class="cancel" 
-              @click.stop="setReply(data)">取消</Button>
-            <Button 
               class="save" 
               type="success" 
-              @click.stop="addBBS(data.reply, data.id)">提交评论</Button>
+              @click.stop="addBBS(data.reply, data.id)">提交回复</Button>
+            <Button 
+              class="cancel" 
+              @click.stop="setReply(data)">取消</Button>
           </div>
         </div>
       </simple-tree>
     </div>
     <div class="page-footer">
       <Page
-        :total="pages"
-        :current="page"/>
+        :total="total"
+        :current="page"
+        @on-change="changePage"/>
     </div>
   </div>
 </template>
@@ -106,7 +112,7 @@ export default {
   data () {
     return {
       page: 1,
-      pages: 1,
+      total: 1,
       bbsList: [],
       content: ''
     }
@@ -124,12 +130,12 @@ export default {
       if (!page) {
         page = this.page
       }
-      bbsApi.getAllBBS(page).then(res => {
+      return bbsApi.getAllBBS(page).then(res => {
         if (res.status === 200) {
           this.generateBBSTree(res.data.bbs)
           let list = res.data.bbs
           this.page = res.data.page
-          this.pages = res.data.pages
+          this.total = res.data.total
         }
       })
     },
@@ -144,12 +150,15 @@ export default {
         return
       }
       bbsApi.addBBS({
-        content: this.content,
+        content,
         responseId: response ? response : undefined
       }).then(res => {
         if (res.status === 200) {
-          this.$Message.success('成功')
+          this.$Message.success('留言成功')
           this.getBBSList(1)
+          if (!response) {
+            this.content = ''
+          }
         }
       })
     },
@@ -181,6 +190,13 @@ export default {
       if (!data.reply) {
         this.$set(data, 'reply', '')
       }
+    },
+    changePage (page) {
+      this.getBBSList(page).then(res => {
+        this.$nextTick(() => {
+          this.$refs.commentInput.scrollIntoView({ block: "start", inline: "nearest", behavior: "smooth" })
+        })
+      })
     }
   }
 }
@@ -195,7 +211,76 @@ export default {
     .submit
       margin .5rem 0
       float right
+  .bbs-list
+    .bbs-tree
+      .bbs-tree-node
+        &:hover
+          .bbs-menu
+            opacity 1
+        .bbs-avatar
+          .avatar-slot
+            display flex
+            align-items center
+            .avatar-img
+              width 2rem
+              height 2rem
+              border-radius 50%
+            .avatar-username
+              padding 0 .5rem
+              user-select none
+              color #3F536E
+              cursor pointer
+              &:hover
+                color #3361d8
+            .reply-action
+              padding 0 .5rem
+            .reply-comment
+              display flex
+              align-items center
+              .reply-avatar-slot
+                display flex
+                align-items center
+                img
+                  width 2rem
+                  height 2rem
+                  border-radius 50%
+                span
+                  padding 0 .5rem
+                  user-select none
+                  cursor pointer
+                  &:hover
+                    color #3361d8
+        .bbs-body, .bbs-menu
+          padding-left 2rem
+        .bbs-menu
+          cursor pointer
+          color #3361d8
+          opacity 0
+          span
+            display flex
+          .reply-icon
+            display flex
+            align-items center
+            font-size 1rem
+        .reply-edit
+          overflow hidden
+          padding-left 2rem
+          .reply-input
+            margin .5rem 0
+          .cancel, .save
+            float right
+            margin 0 4px
   .page-footer
     text-align center
     padding 1rem
 </style>
+
+<style lang="stylus">
+.bbs-tree
+  >div
+    padding .5rem
+    margin .5rem
+    background white
+    border-radius 4px
+</style>
+

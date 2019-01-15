@@ -35,7 +35,7 @@ function responseError (error) {
 
 const instance = axios.create({
   baseURL: BASE_URL,
-  timeout: 15 * 1000,
+  timeout: 60 * 1000,
 })
 
 instance.interceptors.request.use(beforeRequest, requestError)
