@@ -20,13 +20,29 @@
         slot="header" 
         class="login-title">请选择登录方式</div>
       <div class="login-container">
-        <div 
-          class="login-github" 
-          @click.stop="login">
-          <Icon
-            type="logo-github"
-            class="icon"/>
-          <div>github登录</div>
+        <div class="login-tabs">
+          <div 
+            v-for="(tab, idx) of loginTabs" 
+            :key="idx"
+            :class="{
+              tab: true,
+              current: tab.type === loginType 
+            }"
+            @click.stop="loginType = tab.type">{{ tab.title }}</div>
+        </div>
+        <div class="login-tab-content">
+          <div
+            v-if="loginType === 'github'"
+            class="login-github" 
+            @click.stop="loginWithGithub">
+            <Icon
+              type="logo-github"
+              class="icon"/>
+            <div>github登录</div>
+          </div>
+          <Login 
+            v-else-if="loginType === 'passwd'" 
+            class="login-passwd"></Login>
         </div>
       </div>
     </Modal>
@@ -78,14 +94,16 @@
             <div
               :class="{
                 'info-tab': true,
-                current: infoTab === 'info' }">
+                current: infoTab === 'info' }"
+              @click.stop="infoTab='info'">
               <Icon type="md-person" />
             </div>
             <div
               v-if="userInfo.id === currentUser.id"
               :class="{
                 'info-tab': true,
-                current: infoTab === 'setting' }">
+                current: infoTab === 'setting' }"
+              @click.stop="infoTab === 'setting'">
               <Icon type="md-settings" />
             </div>
           </div>
@@ -185,12 +203,14 @@
 <script>
 import { CLIENT_ID } from '@/libs/config'
 import Header from '~/components/Header.vue'
+import Login from '~/components/Login.vue'
 import { mapActions } from 'vuex'
 import userApi from '@/api/user'
 
 export default {
   components: {
-    Header
+    Header,
+    Login
   },
   data () {
     return {
@@ -206,6 +226,17 @@ export default {
       },
       infoTab: 'info', // info setting
       infoShowTab: 'comments', // comments bbs
+      loginType: 'github', // github, passwd
+      loginTabs: [
+        {
+          title: 'github登录',
+          type: 'github',
+        },
+        {
+          title: '帐号密码登录',
+          type: 'passwd'
+        }
+      ]
     }
   },
   computed: {
@@ -245,7 +276,7 @@ export default {
       //   this.getUserDetail()
       // }
     },
-    login () {
+    loginWithGithub () {
       let scope = "user:email"
       let loginWIndow = window.open(`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=${scope}`, 'login', 'resizable=yes,scrollbars=yes,status=yes,height=600,width=800')
       window._loginCallback = (success) => {
@@ -304,34 +335,64 @@ export default {
   padding .5rem
 
 .login-container
-  display flex
-  justify-content space-around
-  align-items center
   min-height 20rem
   user-select none
   padding-bottom 2rem
-  .login-github
-    color #101C2E
-    // width 12rem
-    // height 12rem
-    text-align center
-    cursor pointer
-    box-shadow 0 0 1px 1px #3361d8
-    border-radius 1rem
-    padding .5rem
-    &:hover
-      background rgba(51, 97, 216, .1)
-    .icon
-      font-size 10rem
-    span
-      font-size 1.5rem
-
-.info-container
   display flex
   flex-direction column
+  .login-tabs
+    display flex
+    margin-bottom 1rem
+    border-bottom 1px solid #DFDFDF
+    flex-shrink 0
+    .tab
+      flex auto
+      text-align center
+      border-bottom 2px solid rgba(0,0,0,0)
+      padding-bottom .5rem
+      cursor pointer
+      &.current
+        color #3361d8
+        font-weight bolder
+        border-bottom 2px solid #3361d8
+  .login-tab-content
+    display flex
+    align-items center
+    justify-content center
+    flex auto
+    border 1px solid green
+    .login-passwd
+      align-self stretch
+    .login-github
+      color #101C2E
+      // width 12rem
+      // height 12rem
+      text-align center
+      cursor pointer
+      box-shadow 0 0 1px 1px #3361d8
+      border-radius 1rem
+      padding .5rem
+      &:hover
+        background rgba(51, 97, 216, .1)
+      .icon
+        font-size 10rem
+      span
+        font-size 1.5rem
+
+.info-container
+  position absolute
+  top 0
+  left 0
+  right 0
+  bottom 0
+  display flex
+  flex-direction column
+  overflow hidden
+  padding-left .5rem
   .header
     height 6rem
     display flex
+    flex-shrink 0
     .info-avatar
       .avatar-slot
         display flex
@@ -354,6 +415,7 @@ export default {
             .icon
               margin-right 2px
   .info-content
+    flex auto
     display flex
     min-height 10rem
     .info-tabs
@@ -368,10 +430,13 @@ export default {
           font-size 1rem
     .show-content
       flex auto
+      display flex
+      flex-direction column
       .info-show-tabs
         display flex
         border-bottom 1px solid #ECECEC
         justify-content space-around
+        flex-shrink 0
         .info-comment, .info-bbs
           // flex auto
           text-align center
@@ -385,6 +450,8 @@ export default {
           &.current
             border-bottom 2px solid #3361d8
       .info-show-content
+        flex auto
+        overflow auto
         .comments, .bbs-list
           .comment, .bbs
             .avatar
