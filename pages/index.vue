@@ -41,14 +41,16 @@
             <div>github登录</div>
           </div>
           <Login 
-            v-else-if="loginType === 'passwd'" 
-            class="login-passwd"></Login>
+            v-else-if="loginType === 'passwd'"
+            class="login-passwd"
+            @register-link="showRegister"
+            @success="loginWithPasswd"></Login>
         </div>
       </div>
     </Modal>
     <Drawer
       v-model="infoShow"
-      class-name="header-drawer-container"
+      class-name="info-drawer-container"
       title="个人资料">
       <div 
         v-if="userInfo.id" 
@@ -86,6 +88,16 @@
                   <span>{{ userInfo.bbs.length }}</span>
                 </div>
               </div>
+              <div 
+                v-if="currentUser.manager" 
+                class="setting-manage">
+                <Button
+                  type="primary"
+                  size="small" 
+                  @click.stop="newPost">
+                  添加文章
+                </Button>
+              </div>
             </div>
           </avatar>
         </div>
@@ -102,8 +114,9 @@
               v-if="userInfo.id === currentUser.id"
               :class="{
                 'info-tab': true,
-                current: infoTab === 'setting' }"
-              @click.stop="infoTab === 'setting'">
+                current: infoTab === 'setting'
+              }"
+              @click.stop="infoTab='setting'">
               <Icon type="md-settings" />
             </div>
           </div>
@@ -193,8 +206,95 @@
           <div 
             v-show="infoTab === 'setting'" 
             class="setting-content">
+            <div class="change-avatar">
+              <div class="title">修改头像</div>
+              <img
+                :src="currentUser.avatar"
+                :style="{
+                  width: '8rem',
+                  height: '8rem',
+                  borderRadius: '50%'
+                }"
+                alt="用户头像"
+                @click.stop="clickAvatar"/>
+              <form>
+                <input 
+                  ref="avatarInput" 
+                  :style="'display:none'" 
+                  type="file" 
+                  accept="imag/png,image/jpeg" 
+                  @change="checkAvatarUpload"/>
+              </form>
+              <div>点击图片更换头像</div>
+            </div>
+            <div class="change-username">
+              <div class="title">修改用户名</div>
+              <div class="change-username-content">
+                <Input 
+                  v-model="usernameString"
+                  class="username" />
+                <Button 
+                  type="primary" 
+                  @click.stop="chagneUsername">确定修改用户名</Button>
+              </div>
+            </div>
+            <!-- 第三方登录不允许修改密码 -->
+            <div 
+              v-if="!currentUser.id_string" 
+              class="change-passwd">
+              <div class="title">修改密码</div>
+              <Form 
+                ref="changePasswd" 
+                :model="changePasswd" 
+                :rules="ruleValidate">
+                <FormItem prop="oldPasswd">
+                  <span 
+                    slot="label" 
+                    class="label">旧密码</span>
+                  <Input 
+                    v-model="changePasswd.oldPasswd" 
+                    type="password" 
+                    placeholder="请输入旧密码" />
+                </FormItem>
+                <FormItem prop="newPasswd">
+                  <span 
+                    slot="label" 
+                    class="label">新密码</span>
+                  <Input 
+                    v-model="changePasswd.newPasswd" 
+                    type="password" 
+                    placeholder="请输入新密码" />
+                </FormItem>
+                <FormItem prop="newPasswd2">
+                  <span 
+                    slot="label" 
+                    class="label">确认新密码</span>
+                  <Input 
+                    v-model="changePasswd.newPasswd2" 
+                    type="password" 
+                    placeholder="请确认新密码" />
+                </FormItem>
+                <FormItem :label-width="0">
+                  <Button 
+                    type="primary" 
+                    @click.stop="changePassword('changePasswd')">确认修改密码</Button>
+                </FormItem>
+              </Form>
+            </div>
           </div>
         </div>
+      </div>
+    </Drawer>
+    <Drawer
+      v-model="registerShow"
+      class-name="register-drawer-container"
+      title="创建帐号">
+      <div class="draw-body">
+        <Register
+          class="register-container"
+          @login-link="showLogin('passwd')"
+          @success="showLogin('passwd')">
+        </Register>
       </div>
     </Drawer>
   </div>
@@ -204,19 +304,29 @@
 import { CLIENT_ID } from '@/libs/config'
 import Header from '~/components/Header.vue'
 import Login from '~/components/Login.vue'
+import Register from '~/components/Register.vue'
 import { mapActions } from 'vuex'
 import userApi from '@/api/user'
+import postApi from '@/api/post'
 
 export default {
   components: {
     Header,
-    Login
+    Login,
+    Register
   },
   data () {
+    const validatePassCheck = (rule, value, callback) => {
+      if (value !== this.changePasswd.newPasswd) {
+        callback(new Error('两次密码输入不一致'))
+      } else {
+        callback()
+      }
+    }
     return {
       loginShow: false,
-      infoShow: true,
-      showUserId: 106,
+      infoShow: false,
+      showUserId: 0,
       userInfo: {
         comments: [],
         bbs: [],
@@ -236,7 +346,26 @@ export default {
           title: '帐号密码登录',
           type: 'passwd'
         }
-      ]
+      ],
+      registerShow: false,
+      usernameString: '',
+      changePasswd: {
+        oldPasswd: '',
+        newPasswd: '',
+        newPasswd2: ''
+      },
+      ruleValidate: {
+        oldPasswd: [
+          { required: true, message: '请输入旧密码', trigger: 'blur' }
+        ],
+        newPasswd: [
+          { required: true, message: '请输入新密码', trigger: 'blur' }
+        ],
+        newPasswd2: [
+          { required: true, message: '密码不能为空', trigger: 'blur'},
+          { validator: validatePassCheck, trigger: 'blur'}
+        ]
+      }
     }
   },
   computed: {
@@ -248,7 +377,6 @@ export default {
     this.getTypeList()
     this.getTagList()
     this.getUserInfo()
-    this.getUserDetail()
     this.$bus.$on('login-show', this.showLogin)
     this.$bus.$on('click-avatar', this.showInfo)
     this.$bus.$on('login-callback', this.loginCallback)
@@ -264,13 +392,18 @@ export default {
       getTagList: 'post/getTagList',
       getUserInfo: 'userInfo/getUserInfo'
     }),
-    showLogin () {
+    showLogin (type) {
       this.loginShow = true
+      if (type) this.loginType = type
     },
     showInfo (id) {
       this.infoShow = true
+      this.registerShow = false
       this.showUserId = id
       this.getUserDetail()
+      if (id === this.currentUser.id) {
+        this.usernameString = this.currentUser.username
+      }
       // if (id && id !== this.showUserId) {
       //   this.showUserId = id
       //   this.getUserDetail()
@@ -299,12 +432,87 @@ export default {
       }).catch(error => {
         this.$Message.error('获取用户数据失败')
       })
+    },
+    showRegister () {
+      this.loginShow = false
+      this.infoShow = false
+      this.registerShow = true
+    },
+    loginWithPasswd () {
+      this.loginShow = false
+      this.getUserInfo()
+    },
+    newPost () {
+      postApi.savePost({
+        abstract: '',
+        title: '',
+        body: '',
+        body_html: '',
+        type: 0,
+        tags: [],
+        secretCode: '',
+        hide: true
+      }).then(res => {
+        if (res.status === 200) {
+          this.$router.push({ path: `/home/${res.data.id}/edit` })
+          this.infoShow = false
+        }
+      })
+    },
+    clickAvatar () {
+      this.$refs.avatarInput.click()
+    },
+    checkAvatarUpload (event) {
+      let formData = new FormData()
+      formData.append('image', event.target.files[0])
+      userApi.changeAvatar(formData).then(res => {
+        if (res.status === 200) {
+          this.$store.dispatch('user/getInfo', {
+            id: this.userInfo.id,
+            force: true
+          })
+          this.$store.dispatch('userInfo/getUserInfo')
+          this.getUserDetail()
+        } else {
+          this.$Message.error('上传失败')
+        }
+      }).catch(error => {
+        console.log(error)
+        this.$Message.error('网络请求错误')
+      })
+      event.target.value = ''
+    },
+    changePassword (name) {
+      this.$refs[name].validate(valid => {
+        if (valid) {
+          userApi.changePasswd(this.changePasswd).then(res => {
+            this.$Message.success('密码修改成功')
+          })
+        } else {
+          this.$Message.error('输入不合法，请留意表单提示！')
+        }
+      })
+    },
+    chagneUsername () {
+      userApi.changeUsername({ username: this.usernameString }).then(res => {
+        if (res.status === 200) {
+          this.$Message.success('修改用户名成功')
+          this.$store.dispatch('user/getInfo', {
+            id: this.userInfo.id,
+            force: true
+          })
+          this.$store.dispatch('userInfo/getUserInfo')
+          this.getUserDetail()
+        } else {
+          this.$Message.error('修改用户名出错')
+        }
+      })
     }
   }
 }
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 .page-container
   height 100vh
   width 100vw
@@ -360,9 +568,9 @@ export default {
     align-items center
     justify-content center
     flex auto
-    border 1px solid green
     .login-passwd
       align-self stretch
+      width 20rem
     .login-github
       color #101C2E
       // width 12rem
@@ -378,7 +586,9 @@ export default {
         font-size 10rem
       span
         font-size 1.5rem
+</style>
 
+<style lang="stylus">
 .info-container
   position absolute
   top 0
@@ -425,9 +635,31 @@ export default {
       .info-tab
         margin 4px
         cursor pointer
+        font-size 1rem
         &.current
           color #3361d8
+    .setting-content
+      flex auto
+      overflow auto
+      padding .5rem
+      .change-avatar, .change-username, .change-passwd
+        margin-top .5rem
+        box-shadow 0 0 1px 1px #3361d8
+        border-radius 4px
+        padding .5rem
+        .title
+          margin-bottom .5rem
           font-size 1rem
+          text-align left
+          box-shadow 0 1px 1px -1px #3361D8
+          padding 4px
+      .change-avatar
+        text-align center
+      .change-username
+        .change-username-content
+          padding .5rem
+          .username
+            margin-bottom .5rem
     .show-content
       flex auto
       display flex
@@ -484,12 +716,26 @@ export default {
                     .time
                       margin-left 1rem
                       color #8DABC4
-</style>
 
-<style lang="stylus">
-.header-drawer-container>div
+.info-drawer-container > div
   width 35rem!important
   max-width 100%
-*
-  box-sizing border-box
+.register-drawer-container > div
+  width 25rem!important
+  max-width 100%
+  .draw-body
+    height 100%
+    display flex
+    .register-container
+      height 100%
+      display flex
+      flex auto
+      flex-direction column
+      text-align left
+      &::before
+        content ''
+        flex-grow 1
+      &::after
+        content ''
+        flex-grow 2
 </style>

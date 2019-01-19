@@ -25,7 +25,7 @@ export default {
   mutations: {
     setInfo (state, data) {
       data.avatar = `${BASE_URL}/api/get-file/?filename=${data.avatar}&path=avatar`
-      state.info = Object.assign({ [data.id]: data }, state.info)
+      state.info = Object.assign({}, state.info, { [data.id]: data })
     },
     setLoading (state, data) {
       state.loading[data.id] = data.status

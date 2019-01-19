@@ -1,10 +1,13 @@
 <template>
-  <div class="login-form">
+  <div class="login-container">
     <Form 
       ref="loginInfo" 
       :model="loginInfo" 
-      :rules="ruleValidate">
-      <FormItem prop="email" >
+      :rules="ruleValidate"
+      class="login-form">
+      <FormItem 
+        prop="email" 
+        class="form-item" >
         <span 
           slot="label" 
           class="label">邮箱</span>
@@ -15,7 +18,9 @@
           autocomplete="on" 
           @on-enter="login('loginInfo')"/>
       </FormItem>
-      <FormItem prop="password">
+      <FormItem 
+        prop="password" 
+        class="form-item">
         <span 
           slot="label" 
           class="label">密码</span>
@@ -25,7 +30,9 @@
           placeholder="请输入密码" 
           @on-enter="login('loginInfo')" />
       </FormItem>
-      <FormItem :label-width="0" >
+      <FormItem 
+        :label-width="0" 
+        class="form-item">
         <div class="action">
           <Button 
             class="button" 
@@ -91,25 +98,28 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.login-form
-  max-width 20rem
-  display flex!important
-  .label
-    margin .5rem 0
-  .label, .register-link
-    font-size 1rem
-  .register-link
-    margin-top .5rem
-    .link
-      cursor pointer
-      color blue
-      &:hover
-        text-decoration underline
-  .action
-    display flex
-    justify-content center
-    align-items center
-    .button
-      padding 5px 1rem
-      margin-right 1rem
+.login-container
+  display flex
+  align-items center
+  justify-content center
+  .login-form
+    width 20rem
+    .form-item
+      display block
+    .label, .register-link
+      font-size 1rem
+    .register-link
+      margin-top .5rem
+      .link
+        cursor pointer
+        color blue
+        &:hover
+          text-decoration underline
+    .action
+      display flex
+      justify-content center
+      align-items center
+      .button
+        padding 5px 1rem
+        margin-right 1rem
 </style>

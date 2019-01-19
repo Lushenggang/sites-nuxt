@@ -37,7 +37,8 @@ module.exports = {
     { src: '~plugins/showdown', ssr: false },
     { src: '~plugins/moment', ssr: false },
     { src: '~plugins/simpleTree', ssr: false },
-    { src: '~plugins/common', ssr: false }
+    { src: '~plugins/common', ssr: false },
+    { src: '~plugins/mavon-editor', ssr: false },
   ],
 
   /*

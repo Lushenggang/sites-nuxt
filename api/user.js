@@ -31,6 +31,9 @@ export default {
       headers: { 'content-Type': 'multipart/form-data' }
     })
   },
+  changeUsername (params) {
+    return axios.post('/api/change-username/', params)
+  },
   githubLogin (code) {
     return axios.get('/api/github_login/?code=' + code)
   },

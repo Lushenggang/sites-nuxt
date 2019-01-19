@@ -47,10 +47,6 @@ export default {
         {
           title: '其它',
           type: 'other'
-        },
-        {
-          title: '管理',
-          type: 'manage'
         }
       ]
     }

@@ -2,8 +2,6 @@
   <div>
     <div class="post main-content">
       <div class="post-title">{{ postInfo.title }}</div>
-      {{ tagList }}
-      {{ postInfo.tags }}
       <div class="post-info">
         <div 
           v-if="postInfo.tags" 
@@ -314,19 +312,16 @@ export default {
       })
     },
     editPost () {
-      this.$router.push({
-        name: 'PostEdit',
-        query: {
-          id: this.postInfo.id
-        }
-      })
+      let query = {
+        type: this.$route.query.type
+      }
+      this.$router.push({ path:  `/home/${this.$route.params.id}/edit`, query })
     },
     showPost (type) {
       let query = {
-        type: this.$route.query.type,
-        id: this.postInfo[type].id
+        type: this.$route.query.type
       }
-      this.$router.push({ name: 'Post', query })
+      this.$router.push({ path:  `/home/${this.postInfo[type].id}/`, query })
     },
     generateCommentInfo (comments) {
       this.commentNum = comments.length
