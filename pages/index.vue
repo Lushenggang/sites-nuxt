@@ -451,6 +451,7 @@ export default {
         type: 0,
         tags: [],
         secretCode: '',
+        abstract_image: '',
         hide: true
       }).then(res => {
         if (res.status === 200) {

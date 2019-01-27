@@ -6,5 +6,8 @@ export default {
   },
   addBBS (params) {
     return axios.post('/api/add_bbs/', params)
+  },
+  getRecentBBS () {
+    return axios.get('/api/get-recent-bbs/')
   }
 }

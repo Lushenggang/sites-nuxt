@@ -33,5 +33,16 @@ export default {
   },
   getComments (postId) {
     return axios.get('/api/get-comments/?postId=' + postId)
+  },
+  savePostImage (data) {
+    return axios.put('/api/save-image/', data, {
+      headers: { 'content-Type': 'multipart/form-data' }
+    })
+  },
+  getRecentPosts () {
+    return axios.get('/api/get-recent-posts/')
+  },
+  getHotPosts () {
+    return axios.get('/api/get-hot-posts/')
   }
 }

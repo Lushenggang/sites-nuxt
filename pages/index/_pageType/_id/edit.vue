@@ -29,12 +29,8 @@
     <Modal 
       v-model="showSetting" 
       title="文章设置" 
-      width="80">
+      width="60">
       <div class="post-setting">
-        <div class="post-image">
-          <div class="title">文章缩略图</div>
-          <div></div>
-        </div>
         <div class="post-hide">
           <Checkbox v-model="postInfo.hide">隐藏</Checkbox>
           <Input 
@@ -72,6 +68,22 @@
             </Checkbox>
           </CheckboxGroup>
         </div>
+        <div class="post-image">
+          <div class="title">文章缩略图</div>
+          <div class="image">
+            <img
+              v-if="postInfo.abstract_image" 
+              :src="postInfo.abstract_image" 
+              alt="文章缩略图"
+              @click.stop="clickAbstractImage" />
+            <input 
+              v-else
+              ref="avatarInput" 
+              type="file" 
+              accept="image/png,image/jpeg,iamge/gif"
+              @click.stop="changeAbstractImage"/>
+          </div>
+        </div>
       </div>
     </Modal>
   </div>
@@ -95,7 +107,8 @@ export default {
         type: 0,
         tags: [],
         secretCode: '',
-        hide: false
+        hide: false,
+        abstract_image: ''
       }
     }
   },
@@ -166,12 +179,7 @@ export default {
     imgAdd (pos, file) {
       let formdata = new FormData()
       formdata.append('image', file)
-      axios({
-        url: '/api/save-image/',
-        method: 'put',
-        data: formdata,
-        headers: { 'content-Type': 'multipart/form-data' }
-      }).then(res => {
+      postApi.savePostImage(formdata).then(res => {
         if (res.status === 200) {
           let url = BASE_URL + '/api/get-file/?filename=' + res.data.filename
           this.$refs.md.$img2Url(pos, url)
@@ -186,6 +194,20 @@ export default {
       if (!this.postInfo.abstract) {
         this.postInfo.abstract = this.postInfo.body.slice(0, 500)
       }
+    },
+    changeAbstractImage (event) {
+      let formdata = new FormData()
+      formdata.append('image', event.target.files[0])
+      postApi.savePostImage(formdata).then(res => {
+        if (res.status === 200) {
+          let url = BASE_URL + '/api/get-file/?filename=' + res.data.filename
+          this.postInfo.abstract_image = url
+          postApi.savePost(this.postInfo)
+        }
+      })
+    },
+    clickAbstractImage () {
+      this.$refs.avatarInput.click()
     }
   }
 }
@@ -221,8 +243,14 @@ export default {
       margin .5rem
 
 .post-setting
-  .post-type, .post-tags, .post-hide, .post-abstract
+  .post-type, .post-tags, .post-hide, .post-abstract, .post-image
     margin-bottom 1rem
     .title
       margin-bottom .5rem
+  .post-image
+    .image
+      img
+        width 600px
+        max-width 25rem
+        height auto
 </style>

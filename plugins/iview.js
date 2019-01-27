@@ -12,7 +12,9 @@ import {
   Checkbox,
   CheckboxGroup,
   Select,
-  Option
+  Option,
+  Carousel,
+  CarouselItem
 } from 'iview'
 
 Vue.component('Select', Select)
@@ -27,6 +29,8 @@ Vue.component('Page', Page)
 Vue.component('Form', Form)
 Vue.component('FormItem', FormItem)
 Vue.component('Checkbox', Checkbox)
+Vue.component('Carousel', Carousel)
+Vue.component('CarouselItem', CarouselItem)
 Vue.component('CheckboxGroup', CheckboxGroup)
 Vue.prototype.$Message = Message
 
